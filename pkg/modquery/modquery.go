@@ -114,7 +114,6 @@ func GetStats(mod string, query string) string {
 	lua.LuaMachine.LoadModule(moduleLua)
 	t := lua.LuaMachine.GetTable()
 	data := lua.LuaMachine.ParseTable(&t, "returnJson")
-	fmt.Println(data)
 
 	if err := json.Unmarshal([]byte(data), &module); err != nil {
 		fmt.Println(err)
