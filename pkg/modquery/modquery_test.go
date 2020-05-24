@@ -19,7 +19,6 @@ var getModuleTests = []struct {
 	{"fail", "", nil},
 }
 
-
 func TestGetModule(t *testing.T) {
 	for _, tt := range getModuleTests {
 		t.Run(tt.value, func(t *testing.T) {
@@ -36,13 +35,13 @@ func TestGetModule(t *testing.T) {
 }
 
 var getStatsTests = []struct {
-	module    string
-	query string
+	module   string
+	query    string
 	expected string
 	err      error
 }{
-	{"weapon","Sigma & Octantis", "Sigma & Octantis",nil},
-	{"warframe","Ash", "Ash",nil},
+	{"weapon", "Sigma & Octantis", "Sigma & Octantis", nil},
+	{"warframe", "Ash", "Ash", nil},
 }
 
 func TestGetStats(t *testing.T) {
