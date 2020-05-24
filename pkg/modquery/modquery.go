@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"wfwiki/internal/lua"
+	"wfwiki/pkg/modquery/internal/lua"
 )
 
 type supportedModules struct {
