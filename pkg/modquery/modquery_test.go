@@ -1,7 +1,7 @@
 package modquery
 
 import (
-	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -10,7 +10,7 @@ func Test(t *testing.T) {
 	//fmt.Println(processTest())
 }
 
-var moduleTests = []struct {
+var getModuleTests = []struct {
 	value    string
 	expected string
 	err      error
@@ -19,8 +19,9 @@ var moduleTests = []struct {
 	{"fail", "", nil},
 }
 
+
 func TestGetModule(t *testing.T) {
-	for _, tt := range moduleTests {
+	for _, tt := range getModuleTests {
 		t.Run(tt.value, func(t *testing.T) {
 			res, err := getModule(tt.value)
 			if err != nil {
@@ -34,7 +35,24 @@ func TestGetModule(t *testing.T) {
 	}
 }
 
+var getStatsTests = []struct {
+	module    string
+	query string
+	expected string
+	err      error
+}{
+	{"weapon","Sigma & Octantis", "Sigma & Octantis",nil},
+	{"warframe","Ash", "Ash",nil},
+}
+
 func TestGetStats(t *testing.T) {
-	x := GetStats("warframe", "Ash")
-	fmt.Println(x)
+	for _, tt := range getStatsTests {
+		t.Run(tt.module, func(t *testing.T) {
+			res := GetStats(tt.module, tt.query)
+			if !strings.HasPrefix(res, tt.expected) {
+				t.Errorf("Base result does not match query: Got: %s, Expected: %s", res, tt.expected)
+			}
+
+		})
+	}
 }
