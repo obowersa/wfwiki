@@ -9,10 +9,6 @@ import (
 	"strings"
 )
 
-type supportedModules struct {
-	Weapons WeaponData
-}
-
 type WFModule interface {
 	getURL() string
 	getStatsConcat(string) string
@@ -79,6 +75,8 @@ func getModule(n string) (WFModule, error) {
 		return new(WeaponData), nil
 	case "warframe":
 		return new(WarframeData), nil
+	case "mod":
+		return new(ModData), nil
 	default:
 		return nil, fmt.Errorf("%s does not match supported modules", n)
 	}

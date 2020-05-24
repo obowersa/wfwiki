@@ -15,7 +15,9 @@ var getModuleTests = []struct {
 	expected string
 	err      error
 }{
-	{"weapon", "https://warframe.fandom.com/api.php?action=query&prop=revisions&rvprop=content&format=json&formatversion=2&titles=Module%3AWeapons%2Fdata", nil},
+	{"weapon", weaponURL, nil},
+	{"warframe", warframeURL, nil},
+	{"mod", modURL, nil},
 	{"fail", "", nil},
 }
 
@@ -42,6 +44,7 @@ var getStatsTests = []struct {
 }{
 	{"weapon", "Sigma & Octantis", "Sigma & Octantis", nil},
 	{"warframe", "Ash", "Ash", nil},
+	{"mod", "Abating Link", "Abating Link", nil},
 }
 
 func TestGetStats(t *testing.T) {
