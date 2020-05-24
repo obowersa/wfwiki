@@ -97,6 +97,6 @@ func (w WeaponData) getStatsConcat(name string) string {
 	if _, ok := w.Weapons[name]; ok {
 		return fmt.Sprintf("%s: %+v\n", name, w.Weapons[name])
 	} else {
-		return fmt.Sprintf("No warframe named: %s found", name)
+		return fmt.Sprintf("No weapon named: %s found", name)
 	}
 }
