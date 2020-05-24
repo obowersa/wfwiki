@@ -1,4 +1,4 @@
-module wfwiki
+module github.com/obowersa/wfwiki
 
 go 1.14
 

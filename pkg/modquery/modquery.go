@@ -3,10 +3,10 @@ package modquery
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/obowersa/wfwiki/internal/lua"
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"wfwiki/pkg/modquery/internal/lua"
 )
 
 type supportedModules struct {
