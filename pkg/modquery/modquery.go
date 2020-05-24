@@ -21,20 +21,36 @@ type WFModule interface {
 type WFWiki struct {
 	Query struct {
 		Pages map[string]struct {
-				Pageid    int    `json:"pageid"`
-				Ns        int    `json:"ns"`
-				Title     string `json:"title"`
-				Revisions []struct {
-					Data string `json:"*"`
-				} `json:"revisions"`
-			} `json:"pages"`
-		} `json:"query"`
-	}
+			Pageid    int    `json:"pageid"`
+			Ns        int    `json:"ns"`
+			Title     string `json:"title"`
+			Revisions []struct {
+				Data string `json:"*"`
+			} `json:"revisions"`
+		} `json:"pages"`
+	} `json:"query"`
+}
 
+//Parts struct shared by multiple modules
+type parts struct {
+	Name  string `json:"Name"`
+	Type  string `json:"Type"`
+	Count int    `json:"Count"`
+}
+
+//Cost struct shared by multiple modules
+type cost struct {
+	Credits    int     `json:"Credits, omitempty"`
+	BPCost     int     `json:"BPCost, omitempty"`
+	MarketCost float64 `json:"MarketCost, omitempty"`
+	Rush       int     `json:"Rush, omitempty"`
+	Time       int     `json:"Time, omitempty"`
+	Parts      []parts `json:"Parts, omitempty"`
+}
 
 func getWikiContent(w WFModule) WFWiki {
 	var module WFWiki
-	req, err := http.NewRequest("GET", w.getURL(), nil )
+	req, err := http.NewRequest("GET", w.getURL(), nil)
 	if err != nil {
 		panic(err)
 	}
@@ -68,7 +84,7 @@ func getModule(n string) (WFModule, error) {
 	}
 }
 
-func getWikiLua(m WFModule) (string, error){
+func getWikiLua(m WFModule) (string, error) {
 	var l string
 
 	wikiJson := getWikiContent(m)
@@ -76,7 +92,7 @@ func getWikiLua(m WFModule) (string, error){
 		return "", fmt.Errorf("too many pages for single request")
 	}
 
-	for _, v := range wikiJson.Query.Pages{
+	for _, v := range wikiJson.Query.Pages {
 		l += v.Revisions[0].Data
 	}
 
