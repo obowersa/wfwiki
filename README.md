@@ -1,4 +1,4 @@
-#wfwiki
+# wfwiki
 Implementation of the warframe wiki API endpoints in GoLang with parsing from lua data modules to Structs
 
 TODO:
