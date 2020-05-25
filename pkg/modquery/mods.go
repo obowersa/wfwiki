@@ -28,7 +28,7 @@ func (w ModData) getURL() string {
 func (w ModData) getStatsConcat(name string) string {
 	if _, ok := w.Mods[name]; ok {
 		wMod := w.Mods[name]
-		return fmt.Sprintf("%s: [Polarity: %s, Rarity: %s, Transmutable: %t]", name, wMod.Polarity, wMod.Rarity, wMod.Transmutable)
+		return fmt.Sprintf("%s: [Polarity: %s, Rarity: %s]", name, wMod.Polarity, wMod.Rarity)
 	}
 	return fmt.Sprintf("No mod named: %s found", name)
 
