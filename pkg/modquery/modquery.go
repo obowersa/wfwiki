@@ -36,12 +36,12 @@ type parts struct {
 
 //Cost struct shared by multiple modules
 type cost struct {
-	Credits    int     `json:"Credits, omitempty"`
-	BPCost     int     `json:"BPCost, omitempty"`
-	MarketCost float64 `json:"MarketCost, omitempty"`
-	Rush       int     `json:"Rush, omitempty"`
-	Time       int     `json:"Time, omitempty"`
-	Parts      []parts `json:"Parts, omitempty"`
+	Credits    int     `json:"Credits,omitempty"`
+	BPCost     int     `json:"BPCost,omitempty"`
+	MarketCost float64 `json:"MarketCost,omitempty"`
+	Rush       int     `json:"Rush,omitempty"`
+	Time       int     `json:"Time,omitempty"`
+	Parts      []parts `json:"Parts,omitempty"`
 }
 
 func getWikiContent(w WFModule) WFWiki {
@@ -85,12 +85,12 @@ func getModule(n string) (WFModule, error) {
 func getWikiLua(m WFModule) (string, error) {
 	var l string
 
-	wikiJson := getWikiContent(m)
-	if len(wikiJson.Query.Pages) != 1 {
+	wikiJSON := getWikiContent(m)
+	if len(wikiJSON.Query.Pages) != 1 {
 		return "", fmt.Errorf("too many pages for single request")
 	}
 
-	for _, v := range wikiJson.Query.Pages {
+	for _, v := range wikiJSON.Query.Pages {
 		l += v.Revisions[0].Data
 	}
 

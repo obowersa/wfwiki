@@ -37,7 +37,7 @@ type weapon struct {
 	HeavyRadialDmg  float64      `json:"HeavyRadialDmg"`
 	HeavySlamRadius float64      `json:"HeavySlamRadius"`
 	Name            string       `json:"Name"`
-	Cost            cost         `json:"Cost, omitempty"`
+	Cost            cost         `json:"Cost,omitempty"`
 	Class           string       `json:"Class"`
 	Conclave        bool         `json:"Conclave"`
 	Disposition     float64      `json:"Disposition"`
@@ -83,13 +83,13 @@ func (w WeaponData) getStats(name string) weapon {
 	return w.Weapons[name]
 }
 
-func (w weapon) getDamage() string{
+func (w weapon) getDamage() string {
 	//TODO: Testing, need to create weapon dummy, and move ifs to switch?
 	d := w.NormalAttack.Damage
 	damage := math.Round(d.Slash + d.Impact + d.Puncture)
-	slashPer := math.Round(d.Slash*(100 / damage))
-	impactPer := math.Round(d.Impact*(100/damage))
-	punctPer := math.Round(d.Puncture*(100/damage))
+	slashPer := math.Round(d.Slash * (100 / damage))
+	impactPer := math.Round(d.Impact * (100 / damage))
+	punctPer := math.Round(d.Puncture * (100 / damage))
 
 	damageFmt := fmt.Sprintf("Damage: %.2f", damage)
 	if slashPer == 50.00 || impactPer == 50.00 || punctPer == 50.00 {
@@ -104,9 +104,10 @@ func (w weapon) getDamage() string{
 		return fmt.Sprintf("%s: [Slash: %.2f%%]", damageFmt, slashPer)
 	} else if impactPer > punctPer {
 		return fmt.Sprintf("%s: [Impact: %.2f%%]", damageFmt, impactPer)
-	} else {
-		return fmt.Sprintf("%s: [Puncture: %.2f%%]", damageFmt, punctPer)
 	}
+
+	return fmt.Sprintf("%s: [Puncture: %.2f%%]", damageFmt, punctPer)
+
 }
 func (w WeaponData) getStatsConcat(name string) string {
 	if _, ok := w.Weapons[name]; ok {
@@ -116,12 +117,11 @@ func (w WeaponData) getStatsConcat(name string) string {
 			wWeapon.Mastery,
 			wWeapon.Type,
 			wWeapon.Class,
-			int(wWeapon.NormalAttack.CritChance * 100),
+			int(wWeapon.NormalAttack.CritChance*100),
 			wWeapon.NormalAttack.CritMultiplier,
-			int(wWeapon.NormalAttack.StatusChance * 100),
+			int(wWeapon.NormalAttack.StatusChance*100),
 			wWeapon.getDamage(),
 			wWeapon.NormalAttack.FireRate)
-	} else {
-		return fmt.Sprintf("No weapon named: %s found", name)
 	}
+	return fmt.Sprintf("No weapon named: %s found", name)
 }

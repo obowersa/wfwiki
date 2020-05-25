@@ -10,7 +10,7 @@ func TestParseTable(t *testing.T) {
 	testString := lua.LString("Test")
 	test2 := lua.LValue(testString)
 
-	res := LuaMachine.parseTable(&test2, "returnJson")
+	res := LuaMachine.ParseTable(&test2, "returnJson")
 	if res != "\"Test\"" {
 		t.Errorf("Result was incorrect, expected %s got %s", "Test", res)
 	}
