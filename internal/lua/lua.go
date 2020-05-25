@@ -6,7 +6,7 @@ import (
 
 //TODO: Maybe move this into a new file
 const (
-	tableToJson = `
+	tableToJSON = `
 	json = { _version = "0.1.2" }
 
 	local encode
@@ -160,5 +160,5 @@ func init() {
 		State: lua.NewState(),
 	}
 
-	LuaMachine.LoadModule(tableToJson)
+	LuaMachine.LoadModule(tableToJSON)
 }
