@@ -162,6 +162,7 @@ func (w weapon) getDamage() string {
 func (w WeaponData) getStatsConcat(name string) string {
 	if _, ok := w.Weapons[name]; ok {
 		wWeapon := w.Weapons[name]
+
 		return fmt.Sprintf("%s: [Mastery: %d, Class: %s, NormalAttack: [%s, CritChance: %d%%, CritMultiplier: %.2f, StatusChance: %d%%, FireRate: %.2f], HeavyAttack: %s]",
 			name,
 			wWeapon.Mastery,
