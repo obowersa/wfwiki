@@ -1,13 +1,19 @@
 package modquery
 
 import (
+	"encoding/json"
 	"fmt"
 	"math"
+	"strconv"
 )
 
 const (
 	weaponURL = "https://warframe.fandom.com/api.php?action=query&prop=revisions&rvprop=content&format=json&formatversion=2&titles=Module%3AWeapons%2Fdata"
 )
+
+type heavyAttack struct {
+	Damage string
+}
 
 type damage struct {
 	Impact   float64 `json:"Impact"`
@@ -31,7 +37,7 @@ type weapon struct {
 	SlamAttack      float64      `json:"SlamAttack"`
 	SlamRadialDmg   float64      `json:"SlamRadialDmg"`
 	SlamRadius      float64      `json:"SlamRadius"`
-	HeavyAttack     float64      `json:"HeavyAttack"`
+	HeavyAttack     heavyAttack  `json:"HeavyAttack"`
 	WindUp          float64      `json:"WindUp"`
 	HeavySlamAttack float64      `json:"HeavySlamAttack"`
 	HeavyRadialDmg  float64      `json:"HeavyRadialDmg"`
@@ -75,6 +81,23 @@ type WeaponData struct {
 	Augments      []augments        `json:"Augments"`
 }
 
+func (h heavyAttack) String() string {
+	return fmt.Sprintf("%s", h.Damage)
+}
+
+func (h *heavyAttack) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		var i int
+		if err := json.Unmarshal(data, &i); err != nil {
+			return err
+		}
+		s = strconv.Itoa(i)
+	}
+	h.Damage = s
+	return nil
+}
+
 func (w WeaponData) getURL() string {
 	return weaponURL
 }
@@ -112,7 +135,7 @@ func (w weapon) getDamage() string {
 func (w WeaponData) getStatsConcat(name string) string {
 	if _, ok := w.Weapons[name]; ok {
 		wWeapon := w.Weapons[name]
-		return fmt.Sprintf("%s: [Mastery: %d, Type: %s, Class: %s, NormalAttack: [CritChance: %d%%, CritMultiplier: %.2f, StatusChance: %d%%, %s, FireRate: %.2f]]",
+		return fmt.Sprintf("%s: [Mastery: %d, Type: %s, Class: %s, NormalAttack: [CritChance: %d%%, CritMultiplier: %.2f, StatusChance: %d%%, %s, HeavyAttack: %s FireRate: %.2f]]",
 			name,
 			wWeapon.Mastery,
 			wWeapon.Type,
@@ -121,6 +144,7 @@ func (w WeaponData) getStatsConcat(name string) string {
 			wWeapon.NormalAttack.CritMultiplier,
 			int(wWeapon.NormalAttack.StatusChance*100),
 			wWeapon.getDamage(),
+			wWeapon.HeavyAttack,
 			wWeapon.NormalAttack.FireRate)
 	}
 	return fmt.Sprintf("No weapon named: %s found", name)
