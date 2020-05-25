@@ -38,7 +38,8 @@ func (w WarframeData) getURL() string {
 
 func (w WarframeData) getStatsConcat(name string) string {
 	if _, ok := w.Warframes[name]; ok {
-		return fmt.Sprintf("%s: %+v\n", name, w.Warframes[name])
+		wframe := w.Warframes[name]
+		return fmt.Sprintf("%s: [Armor: %d, Shield: %d, Health: %d, Energy: %d]", name, wframe.Armor, wframe.Shield, wframe.Health, wframe.Energy )
 	} else {
 		return fmt.Sprintf("No warframe named: %s found", name)
 	}
