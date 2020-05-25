@@ -1,26 +1,32 @@
 package modquery
 
 import (
+	"encoding/json"
 	"fmt"
-	"math"
+	"sort"
+	"strconv"
+	"strings"
 )
 
 const (
 	weaponURL = "https://warframe.fandom.com/api.php?action=query&prop=revisions&rvprop=content&format=json&formatversion=2&titles=Module%3AWeapons%2Fdata"
 )
 
-type damage struct {
-	Impact   float64 `json:"Impact"`
-	Puncture float64 `json:"Puncture"`
-	Slash    float64 `json:"Slash"`
+type heavyAttack struct {
+	Damage string
+}
+
+type normalDamage struct {
+	damageType    map[string]float64
+	damagePrimary string
 }
 
 type normalAttack struct {
-	Damage         damage  `json:"Damage"`
-	CritChance     float64 `json:"CritChance"`
-	CritMultiplier float64 `json:"CritMultiplier"`
-	StatusChance   float64 `json:"StatusChance"`
-	FireRate       float64 `json:"FireRate"`
+	Damage         normalDamage `json:"Damage"`
+	CritChance     float64      `json:"CritChance"`
+	CritMultiplier float64      `json:"CritMultiplier"`
+	StatusChance   float64      `json:"StatusChance"`
+	FireRate       float64      `json:"FireRate"`
 }
 
 type weapon struct {
@@ -31,7 +37,7 @@ type weapon struct {
 	SlamAttack      float64      `json:"SlamAttack"`
 	SlamRadialDmg   float64      `json:"SlamRadialDmg"`
 	SlamRadius      float64      `json:"SlamRadius"`
-	HeavyAttack     float64      `json:"HeavyAttack"`
+	HeavyAttack     heavyAttack  `json:"HeavyAttack"`
 	WindUp          float64      `json:"WindUp"`
 	HeavySlamAttack float64      `json:"HeavySlamAttack"`
 	HeavyRadialDmg  float64      `json:"HeavyRadialDmg"`
@@ -75,53 +81,98 @@ type WeaponData struct {
 	Augments      []augments        `json:"Augments"`
 }
 
-func (w WeaponData) getURL() string {
-	return weaponURL
+func (h heavyAttack) String() string {
+	if h.Damage == "" {
+		return "None"
+	}
+	return fmt.Sprintf("%s", h.Damage)
+}
+
+func (h *heavyAttack) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		var i int
+		if err := json.Unmarshal(data, &i); err != nil {
+			return err
+		}
+		s = strconv.Itoa(i)
+	}
+
+	h.Damage = s
+	return nil
+}
+func (n *normalDamage) UnmarshalJSON(data []byte) error {
+	n.damageType = make(map[string]float64)
+	if err := json.Unmarshal(data, &n.damageType); err != nil {
+		return err
+	}
+	return nil
+
 }
 
 func (w WeaponData) getStats(name string) weapon {
 	return w.Weapons[name]
 }
 
-func (w weapon) getDamage() string {
-	//TODO: Testing, need to create weapon dummy, and move ifs to switch?
-	d := w.NormalAttack.Damage
-	damage := math.Round(d.Slash + d.Impact + d.Puncture)
-	slashPer := math.Round(d.Slash * (100 / damage))
-	impactPer := math.Round(d.Impact * (100 / damage))
-	punctPer := math.Round(d.Puncture * (100 / damage))
+func (n normalDamage) totalDamage() string {
+	var f float64
+	for _, v := range n.damageType {
+		f += v
+	}
+	return fmt.Sprintf("%.0f", f)
+}
 
-	damageFmt := fmt.Sprintf("Damage: %.2f", damage)
-	if slashPer == 50.00 || impactPer == 50.00 || punctPer == 50.00 {
-		if slashPer == 50.00 && impactPer == 50.00 {
-			return fmt.Sprintf("%s: [Slash: %.2f%%/Impact: %.2f%%]", damageFmt, slashPer, impactPer)
-		} else if slashPer == 50.00 && punctPer == 50.00 {
-			return fmt.Sprintf("%s: [Slash: %.2f%%/Puncture: %.2f%%]", damageFmt, slashPer, punctPer)
-		} else {
-			return fmt.Sprintf("%s: [Impact: %.2f%%/Puncture: %.2f%%]", damageFmt, impactPer, punctPer)
-		}
-	} else if slashPer > impactPer && slashPer > punctPer {
-		return fmt.Sprintf("%s: [Slash: %.2f%%]", damageFmt, slashPer)
-	} else if impactPer > punctPer {
-		return fmt.Sprintf("%s: [Impact: %.2f%%]", damageFmt, impactPer)
+func (n normalDamage) damagePercent() (string, error) {
+	f := 0.0
+	var fm []string
+	x, err := strconv.ParseFloat(n.totalDamage(), 64)
+	if err != nil {
+		return "", err
 	}
 
-	return fmt.Sprintf("%s: [Puncture: %.2f%%]", damageFmt, punctPer)
+	for k, v := range n.damageType {
+		if v > f {
+			f = v
+			fm = nil
+			fm = append(fm, k)
+		} else if v == f {
+			fm = append(fm, k)
+		}
+	}
+
+	sort.Strings(fm) //We want a consistent order for viewing
+	d := f * (100 / x)
+	return fmt.Sprintf("%s: %.0f%%", strings.Join(fm, "/"), d), nil
+}
+
+func (w WeaponData) getURL() string {
+	return weaponURL
+}
+
+func (w weapon) getDamage() string {
+	d := w.NormalAttack.Damage.totalDamage()
+	v, err := w.NormalAttack.Damage.damagePercent()
+	if err != nil {
+		return "Unknown %"
+	}
+
+	return fmt.Sprintf("Damage: %s (%s)", d, v)
 
 }
 func (w WeaponData) getStatsConcat(name string) string {
 	if _, ok := w.Weapons[name]; ok {
 		wWeapon := w.Weapons[name]
-		return fmt.Sprintf("%s: [Mastery: %d, Class: %s, NormalAttack: [CritChance: %d%%, CritMultiplier: %.2f, StatusChance: %d%%, %s, %s, FireRate: %.2f]]",
+
+		return fmt.Sprintf("%s: [Mastery: %d, Class: %s, NormalAttack: [%s, CritChance: %d%%, CritMultiplier: %.2f, StatusChance: %d%%, FireRate: %.2f], HeavyAttack: %s]",
 			name,
 			wWeapon.Mastery,
-			wWeapon.Type,
+			wWeapon.Class,
+			wWeapon.getDamage(),
 			int(wWeapon.NormalAttack.CritChance*100),
 			wWeapon.NormalAttack.CritMultiplier,
 			int(wWeapon.NormalAttack.StatusChance*100),
-			wWeapon.getDamage(),
-			wWeapon.HeavyAttack,
-			wWeapon.NormalAttack.FireRate)
+			wWeapon.NormalAttack.FireRate,
+			wWeapon.HeavyAttack)
 	}
 	return fmt.Sprintf("No weapon named: %s found", name)
 }

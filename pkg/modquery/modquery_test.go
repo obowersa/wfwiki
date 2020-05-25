@@ -6,10 +6,6 @@ import (
 )
 
 //TODO: Expand testing, include mock of API
-func Test(t *testing.T) {
-	//fmt.Println(processTest())
-}
-
 var getModuleTests = []struct {
 	value    string
 	expected string
@@ -36,18 +32,18 @@ func TestGetModule(t *testing.T) {
 	}
 }
 
-var getStatsTests = []struct {
-	module   string
-	query    string
-	expected string
-	err      error
-}{
-	{"weapon", "Sigma & Octantis", "Sigma & Octantis", nil},
-	{"warframe", "Ash", "Ash", nil},
-	{"mod", "Abating Link", "Abating Link", nil},
-}
-
 func TestGetStats(t *testing.T) {
+	var getStatsTests = []struct {
+		module   string
+		query    string
+		expected string
+		err      error
+	}{
+		{"weapon", "Sigma & Octantis", "Sigma & Octantis", nil},
+		{"warframe", "Ash", "Ash", nil},
+		{"mod", "Abating Link", "Abating Link", nil},
+	}
+
 	for _, tt := range getStatsTests {
 		t.Run(tt.module, func(t *testing.T) {
 			res := GetStats(tt.module, tt.query)
