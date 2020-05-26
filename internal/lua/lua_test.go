@@ -15,5 +15,4 @@ func TestParseTable(t *testing.T) {
 	if res != "\"Test\"" {
 		t.Errorf("Result was incorrect, expected %s got %s", "Test", res)
 	}
-
 }

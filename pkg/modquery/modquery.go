@@ -10,12 +10,12 @@ import (
 	"github.com/obowersa/wfwiki/internal/lua"
 )
 
-type WFModule interface {
+type wfmodule interface {
 	getURL() string
 	getStatsConcat(string) string
 }
 
-type WFWiki struct {
+type wfwiki struct {
 	Query struct {
 		Pages map[string]struct {
 			Pageid    int    `json:"pageid"`
@@ -45,8 +45,9 @@ type cost struct {
 	Parts      []parts `json:"Parts,omitempty"`
 }
 
-func getWikiContent(w WFModule) WFWiki {
-	var module WFWiki
+func getWikiContent(w wfmodule) wfwiki {
+	var module wfwiki
+
 	req, err := http.NewRequest("GET", w.getURL(), nil)
 	if err != nil {
 		panic(err)
@@ -66,24 +67,25 @@ func getWikiContent(w WFModule) WFWiki {
 	if err := json.Unmarshal(body, &module); err != nil {
 		panic(err)
 	}
+
 	return module
 }
 
-func getModule(n string) (WFModule, error) {
+func getModule(n string) (wfmodule, error) {
 	n = strings.ToLower(n)
 	switch n {
 	case "weapon":
-		return new(WeaponData), nil
+		return new(weaponData), nil
 	case "warframe":
-		return new(WarframeData), nil
+		return new(warframeData), nil
 	case "mod":
-		return new(ModData), nil
+		return new(modData), nil
 	default:
 		return nil, fmt.Errorf("%s does not match supported modules", n)
 	}
 }
 
-func getWikiLua(m WFModule) (string, error) {
+func getWikiLua(m wfmodule) (string, error) {
 	var l string
 
 	wikiJSON := getWikiContent(m)
@@ -98,8 +100,9 @@ func getWikiLua(m WFModule) (string, error) {
 	return l, nil
 }
 
+//GetStats queries the wiki module specified by mod, and returns the stats about the object specified
+//by query
 func GetStats(mod string, query string) string {
-
 	module, err := getModule(mod)
 	if err != nil {
 		panic(err)
@@ -119,5 +122,4 @@ func GetStats(mod string, query string) string {
 	}
 
 	return module.getStatsConcat(query)
-
 }

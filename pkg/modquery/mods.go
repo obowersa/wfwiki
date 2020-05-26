@@ -16,20 +16,20 @@ type mods struct {
 	Transmutable bool   `json:"Transmutable"`
 }
 
-type ModData struct {
+type modData struct {
 	IgnoreInCount []string        `json:"IgnoreInCount"`
 	Mods          map[string]mods `json:"Mods"`
 }
 
-func (w ModData) getURL() string {
+func (w modData) getURL() string {
 	return modURL
 }
 
-func (w ModData) getStatsConcat(name string) string {
+func (w modData) getStatsConcat(name string) string {
 	if _, ok := w.Mods[name]; ok {
 		wMod := w.Mods[name]
 		return fmt.Sprintf("%s: [Polarity: %s, Rarity: %s]", name, wMod.Polarity, wMod.Rarity)
 	}
-	return fmt.Sprintf("No mod named: %s found", name)
 
+	return fmt.Sprintf("No mod named: %s found", name)
 }

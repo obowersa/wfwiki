@@ -120,15 +120,20 @@ const (
 	`
 )
 
-// TODO: Implement VM pool to save on memory consumption
+//VM has a single State field which holds a pointer to our lua VM state
+//TODO: Implement VM pool to save on memory consumption
 type VM struct {
 	State *lua.LState
 }
 
+//LuaMachine is a global var which points to our VM struct
+//TODO: Replace the need for this with a channel and pool
 var LuaMachine VM
 
+// ParseTable takes a lua table and lua function string, then executes
+//the function with our table as a parameter. This is used for any
+//table formatting/parsing
 func (v VM) ParseTable(table *lua.LValue, lfunc string) string {
-
 	if err := v.State.CallByParam(lua.P{
 		Fn:      v.State.GetGlobal(lfunc),
 		NRet:    1,
@@ -142,12 +147,15 @@ func (v VM) ParseTable(table *lua.LValue, lfunc string) string {
 	return v.State.Get(-1).String()
 }
 
+//LoadModule takes a string containing lua code and executes it. Storing it in
+//the lua global environment
 func (v VM) LoadModule(lfunc string) {
 	if err := v.State.DoString(lfunc); err != nil {
 		panic(err)
 	}
 }
 
+//GetTable pops a variable from the lua stack, then returns the next variable
 //TODO: This is temporary. Need to figure out a better way to handle multiple return types
 func (v VM) GetTable() lua.LValue {
 	defer v.State.Pop(1)
