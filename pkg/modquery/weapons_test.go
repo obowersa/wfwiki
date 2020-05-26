@@ -52,7 +52,7 @@ func TestHeavyAttackUnmarshalJSON(t *testing.T) {
 }
 
 func TestNormalDamageUnmarshalJSON(t *testing.T) {
-	//TODO: For the tests below, look at combinig into one with subtests. Seems excessive
+	//TODO: For the tests below, look at combining into one with subtests. Seems excessive
 	var tests = []struct {
 		name     string
 		expected map[string]float64
