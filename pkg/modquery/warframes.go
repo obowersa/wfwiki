@@ -6,7 +6,7 @@ const (
 	warframeURL = "https://warframe.fandom.com/api.php?action=query&prop=revisions&rvprop=content&format=json&formatversion=2&titles=Module%3AWarframes%2Fdata"
 )
 
-type Warframe struct {
+type warframe struct {
 	Armor        int      `json:"Armor"`
 	AuraPolarity string   `json:"AuraPolarity"`
 	Conclave     bool     `json:"Conclave"`
@@ -27,19 +27,20 @@ type Warframe struct {
 	SystemCost   cost     `json:"SystemCost"`
 }
 
-type WarframeData struct {
+type warframeData struct {
 	IgnoreInCount []string `json:"IgnoreInCount"`
-	Warframes     map[string]Warframe
+	Warframes     map[string]warframe
 }
 
-func (w WarframeData) getURL() string {
+func (w warframeData) getURL() string {
 	return warframeURL
 }
 
-func (w WarframeData) getStatsConcat(name string) string {
+func (w warframeData) getStatsConcat(name string) string {
 	if _, ok := w.Warframes[name]; ok {
 		wframe := w.Warframes[name]
 		return fmt.Sprintf("%s: [Armor: %d, Shield: %d, Health: %d, Energy: %d]", name, wframe.Armor, wframe.Shield, wframe.Health, wframe.Energy)
 	}
+
 	return fmt.Sprintf("No warframe named: %s found", name)
 }

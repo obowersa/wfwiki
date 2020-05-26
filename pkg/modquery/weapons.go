@@ -73,7 +73,7 @@ type augments struct {
 	Source   string   `json:"Source"`
 	Weapons  []string `json:"Weapons"`
 }
-type WeaponData struct {
+type weaponData struct {
 	IgnoreInCount []string          `json:"IgnoreInCount"`
 	Weapons       map[string]weapon `json:"Weapons"`
 	Stances       []stances         `json:"Stances"`
@@ -84,6 +84,7 @@ func (h heavyAttack) String() string {
 	if h.Damage == "" {
 		return "None"
 	}
+
 	return h.Damage
 }
 
@@ -94,19 +95,22 @@ func (h *heavyAttack) UnmarshalJSON(data []byte) error {
 		if err := json.Unmarshal(data, &i); err != nil {
 			return err
 		}
+
 		s = strconv.Itoa(i)
 	}
 
 	h.Damage = s
+
 	return nil
 }
+
 func (n *normalDamage) UnmarshalJSON(data []byte) error {
 	n.damageType = make(map[string]float64)
 	if err := json.Unmarshal(data, &n.damageType); err != nil {
 		return err
 	}
-	return nil
 
+	return nil
 }
 
 func (n normalDamage) totalDamage() string {
@@ -114,12 +118,15 @@ func (n normalDamage) totalDamage() string {
 	for _, v := range n.damageType {
 		f += v
 	}
+
 	return fmt.Sprintf("%.0f", f)
 }
 
 func (n normalDamage) damagePercent() (string, error) {
-	f := 0.0
 	var fm []string
+
+	f := 0.0
+
 	x, err := strconv.ParseFloat(n.totalDamage(), 64)
 	if err != nil {
 		return "", err
@@ -136,25 +143,28 @@ func (n normalDamage) damagePercent() (string, error) {
 	}
 
 	sort.Strings(fm) //We want a consistent order for viewing
+
 	d := f * (100 / x)
+
 	return fmt.Sprintf("%s: %.0f%%", strings.Join(fm, "/"), d), nil
 }
 
-func (w WeaponData) getURL() string {
+func (w weaponData) getURL() string {
 	return weaponURL
 }
 
 func (w weapon) getDamage() string {
 	d := w.NormalAttack.Damage.totalDamage()
+
 	v, err := w.NormalAttack.Damage.damagePercent()
 	if err != nil {
 		return "Unknown %"
 	}
 
 	return fmt.Sprintf("Damage: %s (%s)", d, v)
-
 }
-func (w WeaponData) getStatsConcat(name string) string {
+
+func (w weaponData) getStatsConcat(name string) string {
 	if _, ok := w.Weapons[name]; ok {
 		wWeapon := w.Weapons[name]
 
@@ -169,5 +179,6 @@ func (w WeaponData) getStatsConcat(name string) string {
 			wWeapon.NormalAttack.FireRate,
 			wWeapon.HeavyAttack)
 	}
+
 	return fmt.Sprintf("No weapon named: %s found", name)
 }

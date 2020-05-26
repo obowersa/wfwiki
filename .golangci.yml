@@ -9,6 +9,7 @@ linters:
   - golint
   - gocyclo
   - prealloc
+  - wsl
 linters-settings:
   govet:
     # report about shadowed variables

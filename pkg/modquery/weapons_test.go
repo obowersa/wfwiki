@@ -122,6 +122,7 @@ func TestNormalDamage_damagePercent(t *testing.T) {
 		{"3 Numbers, 1 50, 2 equal", map[string]float64{"Electric": 50, "Corrosive": 25, "Impact": 25}, "Electric: 50%"},
 		{"4 Numbers, 4 equal", map[string]float64{"Electric": 25, "Corrosive": 25, "Impact": 25, "Puncture": 25}, "Corrosive/Electric/Impact/Puncture: 25%"},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(*testing.T) {
 			var j = new(normalDamage)
