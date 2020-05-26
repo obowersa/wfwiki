@@ -2,7 +2,6 @@ package modquery
 
 import (
 	"encoding/json"
-	"fmt"
 	"testing"
 )
 
@@ -18,7 +17,7 @@ func TestHeavyAttack_String(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.value, func(*testing.T) {
 			h := heavyAttack{tt.value}
-			if fmt.Sprintf("%s", h) != tt.expected {
+			if h.String() != tt.expected {
 				t.Errorf("Unexpected string, Got: %s, Expected: %s", h, tt.expected)
 
 			}
@@ -131,7 +130,7 @@ func TestNormalDamage_damagePercent(t *testing.T) {
 				t.Error(err)
 			}
 
-			if err := json.Unmarshal([]byte(value), &j); err != nil {
+			if err = json.Unmarshal([]byte(value), &j); err != nil {
 				t.Error(err)
 			}
 

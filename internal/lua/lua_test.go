@@ -1,8 +1,9 @@
 package lua
 
 import (
-	lua "github.com/yuin/gopher-lua"
 	"testing"
+
+	lua "github.com/yuin/gopher-lua"
 )
 
 //TODO: Improve testing to validate against structs

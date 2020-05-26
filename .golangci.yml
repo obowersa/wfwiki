@@ -1,0 +1,16 @@
+run:
+linters:
+  enable:
+  - errcheck
+  - gofmt
+  - goimports
+  - gosec
+  - gocritic
+  - golint
+  - gocyclo
+  - prealloc
+linters-settings:
+  govet:
+    # report about shadowed variables
+    check-shadowing: true
+
