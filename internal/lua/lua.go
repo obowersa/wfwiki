@@ -1,7 +1,7 @@
 package lua
 
 import (
-	"github.com/yuin/gopher-lua"
+	lua "github.com/yuin/gopher-lua"
 )
 
 //TODO: Maybe move this into a new file

@@ -3,10 +3,11 @@ package modquery
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/obowersa/wfwiki/internal/lua"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/obowersa/wfwiki/internal/lua"
 )
 
 type WFModule interface {

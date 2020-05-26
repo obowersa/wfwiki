@@ -17,8 +17,7 @@ type heavyAttack struct {
 }
 
 type normalDamage struct {
-	damageType    map[string]float64
-	damagePrimary string
+	damageType map[string]float64
 }
 
 type normalAttack struct {
@@ -85,7 +84,7 @@ func (h heavyAttack) String() string {
 	if h.Damage == "" {
 		return "None"
 	}
-	return fmt.Sprintf("%s", h.Damage)
+	return h.Damage
 }
 
 func (h *heavyAttack) UnmarshalJSON(data []byte) error {
@@ -108,10 +107,6 @@ func (n *normalDamage) UnmarshalJSON(data []byte) error {
 	}
 	return nil
 
-}
-
-func (w WeaponData) getStats(name string) weapon {
-	return w.Weapons[name]
 }
 
 func (n normalDamage) totalDamage() string {
