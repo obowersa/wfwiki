@@ -47,7 +47,7 @@ func TestGetStats(t *testing.T) {
 		{"mod", "Abating Link", "Abating Link", nil},
 	}
 
-	n := NewWFWiki()
+	n := newWFWiki()
 
 	for _, tt := range getStatsTests {
 		t.Run(tt.module, func(t *testing.T) {

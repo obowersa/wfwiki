@@ -12,6 +12,8 @@ import (
 	"github.com/obowersa/wfwiki/internal/lua"
 )
 
+var WikiBase WFWiki
+
 type wfmodule interface {
 	getURL() string
 	getStatsConcat(string) string
@@ -122,49 +124,60 @@ func (r *requestHandler) handleRequest(req *wikiRequest) (resp *wikiResponse) {
 	return
 }
 
+func init(){
+	WikiBase = newWFWiki()
+}
+
 type WFWiki struct {
 	httpReq *requestHandler
 }
 
-func NewWFWiki() WFWiki {
+func newWFWiki() WFWiki {
 	return WFWiki{newRequestHandler()}
 }
 
 //Refactor the below into seperate functions
-func (w *WFWiki) request(m string) (wfmodule, string, error){
-	var wikiBase wikiJSON
+func (w *WFWiki) request(m string) (wfmodule, string, error) {
+	var baseJSON wikiJSON
 
 	module, err := getModule(m)
 	if err != nil {
-		//TODO: Handle this gracefully
-		panic(err)
+		return nil, "", err
 	}
 
-	//Wiki request creator ?
 	req := wikiRequest{module.getURL(), nil, nil}
 	res := w.httpReq.handleRequest(&req).response
 
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
+		return nil, "", err
+	}
+
+	if err := json.Unmarshal(body, &baseJSON); err != nil {
+		return nil, "", err
+	}
+
+	lCode, err := baseJSON.parseLua()
+	if err != nil {
 		panic(err)
 	}
 
-	if err := json.Unmarshal(body, &wikiBase); err != nil {
-		panic(err)
-	}
+	return module, lCode, nil
+}
 
+func (w wikiJSON) parseLua() (string, error){
 	var l string
 
-	if len(wikiBase.Query.Pages) != 1 {
-		return module, "", fmt.Errorf("too many pages for single request")
+	if len(w.Query.Pages) != 1 {
+		return "", fmt.Errorf("too many pages for single request")
 	}
 
-	for _, v := range wikiBase.Query.Pages {
+	for _, v := range w.Query.Pages {
 		l += v.Revisions[0].Data
 	}
 
-	return module, l, nil
+	return l, nil
 }
 
 func getModule(n string) (wfmodule, error) {
@@ -180,7 +193,6 @@ func getModule(n string) (wfmodule, error) {
 		return nil, fmt.Errorf("%s does not match supported modules", n)
 	}
 }
-
 
 //GetStats queries the wiki module specified by mod, and returns the stats about the object specified
 //by query
