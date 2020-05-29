@@ -14,59 +14,38 @@ type ModuleContent interface {
 	Get() ([]byte, error)
 }
 
-type revision struct {
-	data string `json:"*"`
-}
-
-type pages struct {
-	pageid int `json:"pageid"`
-	ns int `json:"ns"`
-	title string `json:"title"`
-	revisions []string `json:"revisions"`
-}
-
-type query struct {
-	pages map[string]pages `json:"pages"`
-}
-
 type container struct {
-	query query `json:"query"`
+	Query struct {
+		Pages map[string]struct {
+			Pageid    int    `json:"pageid"`
+			Ns        int    `json:"ns"`
+			Title     string `json:"title"`
+			Revisions []struct {
+				Data string `json:"*"`
+			} `json:"revisions"`
+		} `json:"pages"`
+	} `json:"query"`
 }
 
-func (rp *revision) Unmarshal(data []byte) error {
-	var cp *container
-	if err := json.Unmarshal(data, &cp); err != nil {
-		return fmt.Errorf("%e", err)
-	}
-
-	if l := len(cp.query.pages); l != 1 {
-		return fmt.Errorf("invalid number of pages. Got: %d, Expected: 1", l)
-	}
-
-	//Pages will only be length 1, but the source object has a dynamic name. Look to refactor this
-	for _, v := range cp.query.pages {
-		if err := json.Unmarshal([]byte(v.revisions[0]), &rp); err != nil {
-			return fmt.Errorf("%e", err)
-		}
-	}
-
-	return nil
-}
-
-
-func JSONToString(m ModuleContent) (string, error) {
-	var base revision
-
+func JSONToString(m []byte) (string, error) {
+/*
 	c, err := m.Get()
 	if err != nil {
 		return "", fmt.Errorf("%e", err)
 	}
-
-	if err := json.Unmarshal(c, &base); err != nil {
+*/
+	var cp container
+	var base string
+	if err := json.Unmarshal(m, &cp); err != nil {
 		return "", fmt.Errorf("%e", err)
 	}
 
-	lua.LuaMachine.LoadModule(base.data)
+	//Pages will only be length 1, but the source object has a dynamic name. Look to refactor this
+	for _, v := range cp.Query.Pages {
+		base = v.Revisions[0].Data
+	}
+
+	lua.LuaMachine.LoadModule(base)
 	t := lua.LuaMachine.GetTable()
 	data := lua.LuaMachine.ParseTable(&t, "returnJson")
 

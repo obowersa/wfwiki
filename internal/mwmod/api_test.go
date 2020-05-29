@@ -7,16 +7,17 @@ import (
 	"testing"
 )
 
-type testModuleContent struct {}
+/*
+type testModuleContent struct{}
 
 func (v testModuleContent) Get() ([]byte, error) {
 	return []byte("test"), nil
-}
+}*/
 
 func TestJSONToString(t *testing.T) {
-	v := testModuleContent{}
+	//v := testModuleContent{}
 
-	_, err := JSONToString(v)
+	_, err := JSONToString([]byte("Test"))
 	if err != nil {
 		fmt.Errorf("%e", err)
 	}

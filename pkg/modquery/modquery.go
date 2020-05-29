@@ -1,26 +1,31 @@
 package modquery
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/obowersa/wfwiki/internal/mwmod"
+	"github.com/obowersa/wfwiki/internal/ratelimit"
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"time"
 )
 
+//TODO: Refactor this when I figure out client side API
 var WikiBase WFWiki
-
-
-type WFWiki struct {
-	httpReq *requestHandler
-}
 
 type wfmodule interface {
 	getURL() string
 	getStatsConcat(string) string
+}
+
+type WFWiki struct {
+	client *http.Client
+	handler ratelimit.Handler
+}
+
+type request struct {
+	wiki *WFWiki
+	url string
 }
 
 //Parts struct shared by multiple modules
@@ -40,106 +45,43 @@ type cost struct {
 	Parts      []parts `json:"Parts,omitempty"`
 }
 
-type wikiResponse struct {
-	response *http.Response
-	err      error
-}
 
-type wikiRequest struct {
-	url    string
-	respCh chan *wikiResponse
-	ctx    context.Context
-}
-
-type requestHandler struct {
-	client     *http.Client
-	rate       time.Duration
-	reqCh      chan *wikiRequest
-	reqTimeout time.Duration
-}
-
-func newRequestHandler() *requestHandler {
-	client := &http.Client{}
-	rate := time.Second
-	requests := make(chan *wikiRequest, 10)
-	reqTimeout := 5 * time.Second
-	r := requestHandler{client, rate, requests, reqTimeout}
-
-	go r.processRequests()
-
-	return &r
-}
-
-func (r *requestHandler) processRequests() {
-	throttle := time.NewTicker(r.rate)
-
-	for req := range r.reqCh {
-		<-throttle.C
-		//NOTE: Move getWikiContent function to be a method of requestHandler?
-		//NOTE: Reconsider this when testing turns out to be a pain
-		go r.fulfillRequest(req)
-	}
-}
-
-func (r *requestHandler) fulfillRequest(wReq *wikiRequest) {
-	//TODO: Add in hook to caching algorithm. Want to avoid parsing the lua code into the VM for every response
-	//TODO: Potentially impact cache check within process reqCh. Return cache before waiting for ticker so repeated reqCh can be fulfilled outside of the 1/s tick loop
-	res, err := r.client.Get(wReq.url)
-	//TODO: Refactor select statement based on: https://blog.golang.org/pipelines
-	select {
-	case <-wReq.ctx.Done():
-		return
-	default:
-		wReq.respCh <- &wikiResponse{res, err}
-	}
-}
-
-func (r *requestHandler) handleRequest(req *wikiRequest) (resp *wikiResponse) {
-	//TODO: Look into moving getModule func into requestHandler method sig
-	c := make(chan *wikiResponse)
-	ctx, cancel := context.WithCancel(context.Background())
-
-	defer close(c)
-
-	r.reqCh <- &wikiRequest{req.url, c, ctx}
-	select {
-	case n := <-c:
-		cancel()
-		resp = n
-	case <-time.After(r.reqTimeout):
-		cancel()
-		//TODO: Refactor error handling
-		resp = &wikiResponse{err: fmt.Errorf("timeout waiting for response from: %s", req.url)}
-	}
-
-	return
-}
-
-func init(){
+func init() {
 	WikiBase = newWFWiki()
 }
 
-
 func newWFWiki() WFWiki {
-	return WFWiki{newRequestHandler()}
+	return WFWiki{&http.Client{},*ratelimit.NewHandler()}
 }
 
 //Refactor the below into seperate functions
-func (w WFWiki) Get() ([]byte, error) {
-	req := wikiRequest{w.getURL(), nil, nil}
-	res := w.httpReq.handleRequest(&req).response
+func (w WFWiki) GetStats(mod string, query string) (string, error) {
 
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
+	m, err := w.module(mod)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return body, nil
+	r := request{&w,m.getURL()}
+
+	res, err := w.handler.Get(&r)
+	if err != nil {
+		return "", err
+	}
+
+	data, err := mwmod.JSONToString(res)
+	if err != nil {
+		fmt.Errorf("%s", err)
+	}
+
+
+	if err := json.Unmarshal([]byte(data), &m); err != nil {
+		fmt.Println("TEST")
+	}
+	return m.getStatsConcat(query), nil
 }
 
-
-func getModule(n string) (wfmodule, error) {
+func (w WFWiki) module(n string) (wfmodule, error) {
 	n = strings.ToLower(n)
 	switch n {
 	case "weapon":
@@ -153,21 +95,16 @@ func getModule(n string) (wfmodule, error) {
 	}
 }
 
-//GetStats queries the wiki module specified by mod, and returns the stats about the object specified
-//by query
-func (w WFWiki) GetStats(mod string, query string) string {
-	module, err := getModule(mod)
+func (r request) Call() ([]byte, error) {
+	res, err := r.wiki.client.Get(r.url)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	data, err := mwmod.JSONToString(w)
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	if err := json.Unmarshal([]byte(data), &data); err != nil {
-		fmt.Println(err)
-	}
-
-	return module.getStatsConcat(query)
+	return body, nil
 }
