@@ -1,5 +1,5 @@
 /*
-Package modquery provides a client for the Warframe Fandom Wiki's module data.
+Package wfwiki provides a client for the Warframe Fandom Wiki's module data.
 
 Usage:
 
@@ -25,7 +25,7 @@ MediaWiki/Fandom's module/data pages are lua tables. When querying the API a JSO
 lua code. We parse this table through an embedded lua VM and convert it to JSON before unmarshalling the resulting
 []byte object into a struct
 */
-package modquery
+package wfwiki
 
 import (
 	"encoding/json"
@@ -40,27 +40,12 @@ type wfmodule interface {
 	getStatsConcat(string) string
 }
 
-//Parts struct shared by multiple modules
-type parts struct {
-	Name  string `json:"Name"`
-	Type  string `json:"Type"`
-	Count int    `json:"Count"`
-}
-
-//Cost struct shared by multiple modules
-type cost struct {
-	Credits    int     `json:"Credits,omitempty"`
-	BPCost     int     `json:"BPCost,omitempty"`
-	MarketCost float64 `json:"MarketCost,omitempty"`
-	Rush       int     `json:"Rush,omitempty"`
-	Time       int     `json:"Time,omitempty"`
-	Parts      []parts `json:"Parts,omitempty"`
-}
-
+//WFWiki wraps the underlying Wiki client
 type WFWiki struct {
 	Wiki *mwmod.Wiki
 }
 
+//NewWFWiki creates a new WFWIki struct with the underlying Wiki initialised with the default datasource handler
 func NewWFWiki() WFWiki {
 	return WFWiki{mwmod.NewWiki(nil)}
 }

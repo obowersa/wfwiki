@@ -1,4 +1,4 @@
-package modquery
+package wfwiki
 
 import "fmt"
 

@@ -31,7 +31,7 @@ func (d defaultds) Get(s string) ([]byte, error) {
 	return body, err
 }
 
-//WFWiki encapsulates the transport client and the ratelimit handler
+//Wiki encapsulates the transport client and the ratelimit handler
 type Wiki struct {
 	Client  datasource
 	Handler ratelimit.Handler
