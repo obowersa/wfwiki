@@ -16,18 +16,15 @@ func TestRequest_Call(t *testing.T) {
 	}{
 		{"base_test", "test", nil},
 	}
-
+	//TODO: Change test values to represent underlying JSON
 	for _, tt := range ds {
 		t.Run(tt.name, func(t *testing.T) {
-			var w Wiki
 
-			w.Client = testDatasource{}
-			r := request{&w, tt.value}
-			got, err := r.Call()
+			w := NewWiki(testDatasource{})
+			//r := request{w, tt.value}
+			_, err := w.Request(tt.value)
 			if err != nil {
 				t.Errorf("test: %s returned an error: %s", tt.name, err)
-			} else if string(got) != tt.value {
-				t.Errorf("test: %s returned unexpected result. Got: %s, expected: %s", tt.name, got, tt.value)
 			}
 		})
 	}

@@ -38,8 +38,11 @@ type Wiki struct {
 }
 
 //NewWiki returns a Wiki struct. This initialises our http client and ratelimit handler
-func NewWiki() *Wiki {
-	d := defaultds{&http.Client{}}
+func NewWiki(d datasource) *Wiki {
+	if d == nil {
+		d = defaultds{&http.Client{}}
+	}
+
 	return &Wiki{d, *ratelimit.NewHandler()}
 }
 
