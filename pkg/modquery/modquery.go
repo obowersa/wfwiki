@@ -30,28 +30,14 @@ package modquery
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"strings"
 
 	"github.com/obowersa/wfwiki/internal/mwmod"
-	"github.com/obowersa/wfwiki/internal/ratelimit"
 )
 
 type wfmodule interface {
 	getURL() string
 	getStatsConcat(string) string
-}
-
-//WFWiki encapsulates the transport client and the ratelimit handler
-type WFWiki struct {
-	Client  *http.Client
-	Handler ratelimit.Handler
-}
-
-type request struct {
-	wiki *WFWiki
-	url  string
 }
 
 //Parts struct shared by multiple modules
@@ -71,26 +57,22 @@ type cost struct {
 	Parts      []parts `json:"Parts,omitempty"`
 }
 
-//NewWFWiki returns a WFWiki struct. This initialises our http client and ratelimit handler
+type WFWiki struct {
+	Wiki *mwmod.Wiki
+}
+
 func NewWFWiki() WFWiki {
-	return WFWiki{&http.Client{}, *ratelimit.NewHandler()}
+	return WFWiki{mwmod.NewWiki()}
 }
 
 //GetStats returns an opinionated set of results for a given module
-func (w WFWiki) GetStats(mod string, query string) (string, error) {
+func (w *WFWiki) GetStats(mod string, query string) (string, error) {
 	m, err := w.module(mod)
 	if err != nil {
 		return "", err
 	}
 
-	r := request{&w, m.getURL()}
-
-	res, err := w.Handler.Get(&r)
-	if err != nil {
-		return "", err
-	}
-
-	data, err := mwmod.JSONToString(res)
+	data, err := w.Wiki.Request(m.getURL())
 	if err != nil {
 		fmt.Printf("%s", err)
 	}
@@ -114,19 +96,4 @@ func (w WFWiki) module(n string) (wfmodule, error) {
 	default:
 		return nil, fmt.Errorf("%s does not match supported modules", n)
 	}
-}
-
-func (r request) Call() ([]byte, error) {
-	res, err := r.wiki.Client.Get(r.url)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return body, nil
 }
