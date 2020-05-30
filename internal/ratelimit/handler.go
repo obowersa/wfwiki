@@ -1,3 +1,8 @@
+/*
+Package ratelimit is a simple rate limiting implementation which works on an endpoint interface. A lot of this is
+hardcoded for a specific requirement right now but the plan is to make it more generalised in the future or replace it
+with a more robust library.
+*/
 package ratelimit
 
 import (
@@ -5,6 +10,7 @@ import (
 	"fmt"
 	"time"
 )
+
 // Notes:
 
 type endpoint interface {
@@ -21,12 +27,19 @@ type request struct {
 	ctx    context.Context
 }
 
+//Handler is a struct which holds our rate limit configuration
 type Handler struct {
 	rate    time.Duration
 	reqCh   chan *request
 	timeout time.Duration
 }
 
+/*
+NewHandler implements the Handler struct with sane defaults. Currently the defaults are:
+	rate: 1 per second
+	requests channel buffer: 10
+	request timeout: 5 seconds
+*/
 func NewHandler() *Handler {
 	rate := time.Second
 	//TODO: Look into the standard library to see if this is idiomatic. Unsure about making a channel of interfaces
@@ -49,7 +62,6 @@ func (r *Handler) limiter() {
 	}
 }
 
-
 func (r *Handler) process(req *request) {
 	res, err := req.epoint.Call()
 	select {
@@ -60,6 +72,7 @@ func (r *Handler) process(req *request) {
 	}
 }
 
+//Get is the entry point for adding a request to the rate limit queue.
 func (r *Handler) Get(req endpoint) ([]byte, error) {
 	c := make(chan *result)
 	ctx, cancel := context.WithCancel(context.Background())

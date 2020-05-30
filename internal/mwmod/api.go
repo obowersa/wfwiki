@@ -7,12 +7,16 @@ package mwmod
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/obowersa/wfwiki/internal/lua"
 )
 
+/*
+TODO: Revisit ModuleInterface
+ModuleInterface is intended to be used with the JSOnToString implementation. Need to revisit this
 type ModuleContent interface {
 	Get() ([]byte, error)
-}
+}*/
 
 type container struct {
 	Query struct {
@@ -27,15 +31,15 @@ type container struct {
 	} `json:"query"`
 }
 
-func JSONToString(m []byte) (string, error) {
 /*
-	c, err := m.Get()
-	if err != nil {
-		return "", fmt.Errorf("%e", err)
-	}
+JSONToString unmarshalls a MediaWiki/Fandom API response for a module/data page, then calls out to a Lua library
+to process the remaining data table into a JSON string.
 */
+func JSONToString(m []byte) (string, error) {
 	var cp container
+
 	var base string
+
 	if err := json.Unmarshal(m, &cp); err != nil {
 		return "", fmt.Errorf("%e", err)
 	}
