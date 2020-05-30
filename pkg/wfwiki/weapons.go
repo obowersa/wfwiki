@@ -21,6 +21,7 @@ type normalDamage struct {
 }
 
 type normalAttack struct {
+	AttackName     string       `json:"AttackName,omitempty"`
 	Damage         normalDamage `json:"Damage"`
 	CritChance     float64      `json:"CritChance"`
 	CritMultiplier float64      `json:"CritMultiplier"`
@@ -50,6 +51,7 @@ type weapon struct {
 	Introduced      string       `json:"Introduced"`
 	Mastery         int          `json:"Mastery"`
 	NormalAttack    normalAttack `json:"NormalAttack"`
+	SecondaryAttack normalAttack `json:"SecondaryAttack"`
 	SlideAttack     int          `json:"SlideAttack"`
 	StancePolarity  string       `json:"StancePolarity"`
 	Traits          []string     `json:"Traits"`
@@ -167,8 +169,10 @@ func (w weapon) getDamage() string {
 func (w weaponData) getStatsConcat(name string) string {
 	if _, ok := w.Weapons[name]; ok {
 		wWeapon := w.Weapons[name]
+		fmt.Println("TEST")
+		fmt.Println(wWeapon.SecondaryAttack)
 
-		return fmt.Sprintf("%s: [Mastery: %d, Class: %s, NormalAttack: [%s, CritChance: %d%%, CritMultiplier: %.2f, StatusChance: %d%%, FireRate: %.2f], HeavyAttack: %s]",
+		return fmt.Sprintf("%s: [Mastery: %d, Class: %s, NormalAttack: [%s, CritChance: %d%%, CritMultiplier: %.2f, StatusChance: %d%%, FireRate: %.2f], HeavyAttack: %s, SecondaryAttack: %v]",
 			name,
 			wWeapon.Mastery,
 			wWeapon.Class,
@@ -177,7 +181,9 @@ func (w weaponData) getStatsConcat(name string) string {
 			wWeapon.NormalAttack.CritMultiplier,
 			int(wWeapon.NormalAttack.StatusChance*100),
 			wWeapon.NormalAttack.FireRate,
-			wWeapon.HeavyAttack)
+			wWeapon.HeavyAttack,
+			wWeapon.SecondaryAttack,
+		)
 	}
 
 	return fmt.Sprintf("No weapon named: %s found", name)
