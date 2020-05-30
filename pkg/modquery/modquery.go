@@ -62,7 +62,7 @@ type WFWiki struct {
 }
 
 func NewWFWiki() WFWiki {
-	return WFWiki{mwmod.NewWiki()}
+	return WFWiki{mwmod.NewWiki(nil)}
 }
 
 //GetStats returns an opinionated set of results for a given module
