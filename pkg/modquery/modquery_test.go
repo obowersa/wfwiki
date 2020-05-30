@@ -33,7 +33,7 @@ func TestGetModule(t *testing.T) {
 	}
 }
 
- */
+*/
 
 func TestGetStats(t *testing.T) {
 	var getStatsTests = []struct {
@@ -47,15 +47,13 @@ func TestGetStats(t *testing.T) {
 		{"mod", "Abating Link", "Abating Link", nil},
 	}
 
-
-
 	for _, tt := range getStatsTests {
 		t.Run(tt.module, func(t *testing.T) {
-			n := newWFWiki()
+			n := NewWFWiki()
 
-			res, err  := n.GetStats(tt.module, tt.query)
+			res, err := n.GetStats(tt.module, tt.query)
 			if err != nil {
-				t.Errorf("%s",err)
+				t.Errorf("%s", err)
 			}
 			if !strings.HasPrefix(res, tt.expected) {
 				t.Errorf("Base result does not match query: Got: %s, Expected: %s", res, tt.expected)
@@ -64,4 +62,3 @@ func TestGetStats(t *testing.T) {
 		})
 	}
 }
-

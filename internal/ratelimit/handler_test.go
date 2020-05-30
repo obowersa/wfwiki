@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type testEndpoint struct {}
+type testEndpoint struct{}
 
 func (e testEndpoint) Call() ([]byte, error) {
 	return []byte("TestingEndpoint"), nil
@@ -47,4 +47,3 @@ func TestRequestHandler(t *testing.T) {
 		t.Errorf("rate limiting failed, testDuration: %s, baseDuration: %s", testDuration, baseDuration)
 	}
 }
-
