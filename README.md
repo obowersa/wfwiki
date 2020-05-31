@@ -21,7 +21,6 @@ Current tables which are supported:
 - [ ] Support for data tables which have name collisions in the same object. Currently duplicate names like SecondaryAttack for a weapon will get dropped
 - [ ] Implement simple cache with checking of hash
 - [ ] Implement lua worker pool
-- [ ] Create example CLI for querying
 - [ ] Move GetStats outside of package. Currently it is used for  a temporary test client
 - [ ] Create examples folder
 
