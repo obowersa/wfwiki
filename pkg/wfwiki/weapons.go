@@ -170,14 +170,19 @@ func (w weaponData) getStatsConcat(name string) string {
 	if _, ok := w.Weapons[name]; ok {
 		wWeapon := w.Weapons[name]
 
-		return fmt.Sprintf("%s: [Mastery: %d, Class: %s, NormalAttack: %s, HeavyAttack: %s, SecondaryAttack: %s",
+		res := fmt.Sprintf("%s: [Mastery: %d, Class: %s, NormalAttack: %s, HeavyAttack: %s",
 			name,
 			wWeapon.Mastery,
 			wWeapon.Class,
 			wWeapon.NormalAttack.getDamage(),
 			wWeapon.HeavyAttack,
-			wWeapon.SecondaryAttack.getDamage(),
 		)
+
+		if wWeapon.SecondaryAttack.AttackName != "" {
+			res = fmt.Sprintf("%s, SecondaryAttack: %s", res, wWeapon.SecondaryAttack.getDamage())
+		}
+
+		return res
 	}
 
 	return fmt.Sprintf("No weapon named: %s found", name)
