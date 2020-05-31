@@ -16,47 +16,47 @@ type heavyAttack struct {
 	Damage string
 }
 
-type normalDamage struct {
+type baseDamage struct {
 	damageType map[string]float64
 }
 
-type normalAttack struct {
-	AttackName     string       `json:"AttackName,omitempty"`
-	Damage         normalDamage `json:"Damage"`
-	CritChance     float64      `json:"CritChance"`
-	CritMultiplier float64      `json:"CritMultiplier"`
-	StatusChance   float64      `json:"StatusChance"`
-	FireRate       float64      `json:"FireRate"`
+type attack struct {
+	AttackName     string     `json:"AttackName,omitempty"`
+	Damage         baseDamage `json:"Damage"`
+	CritChance     float64    `json:"CritChance"`
+	CritMultiplier float64    `json:"CritMultiplier"`
+	StatusChance   float64    `json:"StatusChance"`
+	FireRate       float64    `json:"FireRate"`
 }
 
 type weapon struct {
-	BlockAngle      int          `json:"BlockAngle"`
-	ComboDur        int          `json:"ComboDur"`
-	FollowThrough   float64      `json:"FollowThrough"`
-	MeleeRange      float64      `json:"MeleeRange"`
-	SlamAttack      float64      `json:"SlamAttack"`
-	SlamRadialDmg   float64      `json:"SlamRadialDmg"`
-	SlamRadius      float64      `json:"SlamRadius"`
-	HeavyAttack     heavyAttack  `json:"HeavyAttack"`
-	WindUp          float64      `json:"WindUp"`
-	HeavySlamAttack float64      `json:"HeavySlamAttack"`
-	HeavyRadialDmg  float64      `json:"HeavyRadialDmg"`
-	HeavySlamRadius float64      `json:"HeavySlamRadius"`
-	Name            string       `json:"Name"`
-	Cost            cost         `json:"Cost,omitempty"`
-	Class           string       `json:"Class"`
-	Conclave        bool         `json:"Conclave"`
-	Disposition     float64      `json:"Disposition"`
-	Image           string       `json:"Image"`
-	Introduced      string       `json:"Introduced"`
-	Mastery         int          `json:"Mastery"`
-	NormalAttack    normalAttack `json:"NormalAttack"`
-	SecondaryAttack normalAttack `json:"SecondaryAttack"`
-	SlideAttack     int          `json:"SlideAttack"`
-	StancePolarity  string       `json:"StancePolarity"`
-	Traits          []string     `json:"Traits"`
-	Type            string       `json:"Type"`
-	Users           []string     `json:"Users"`
+	BlockAngle      int         `json:"BlockAngle"`
+	ComboDur        int         `json:"ComboDur"`
+	FollowThrough   float64     `json:"FollowThrough"`
+	MeleeRange      float64     `json:"MeleeRange"`
+	SlamAttack      float64     `json:"SlamAttack"`
+	SlamRadialDmg   float64     `json:"SlamRadialDmg"`
+	SlamRadius      float64     `json:"SlamRadius"`
+	HeavyAttack     heavyAttack `json:"HeavyAttack"`
+	WindUp          float64     `json:"WindUp"`
+	HeavySlamAttack float64     `json:"HeavySlamAttack"`
+	HeavyRadialDmg  float64     `json:"HeavyRadialDmg"`
+	HeavySlamRadius float64     `json:"HeavySlamRadius"`
+	Name            string      `json:"Name"`
+	Cost            cost        `json:"Cost,omitempty"`
+	Class           string      `json:"Class"`
+	Conclave        bool        `json:"Conclave"`
+	Disposition     float64     `json:"Disposition"`
+	Image           string      `json:"Image"`
+	Introduced      string      `json:"Introduced"`
+	Mastery         int         `json:"Mastery"`
+	NormalAttack    attack      `json:"NormalAttack"`
+	SecondaryAttack attack      `json:"SecondaryAttack"`
+	SlideAttack     int         `json:"SlideAttack"`
+	StancePolarity  string      `json:"StancePolarity"`
+	Traits          []string    `json:"Traits"`
+	Type            string      `json:"Type"`
+	Users           []string    `json:"Users"`
 }
 
 type stances struct {
@@ -106,7 +106,7 @@ func (h *heavyAttack) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (n *normalDamage) UnmarshalJSON(data []byte) error {
+func (n *baseDamage) UnmarshalJSON(data []byte) error {
 	n.damageType = make(map[string]float64)
 	if err := json.Unmarshal(data, &n.damageType); err != nil {
 		return err
@@ -115,7 +115,7 @@ func (n *normalDamage) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (n normalDamage) totalDamage() string {
+func (n baseDamage) totalDamage() string {
 	var f float64
 	for _, v := range n.damageType {
 		f += v
@@ -124,7 +124,7 @@ func (n normalDamage) totalDamage() string {
 	return fmt.Sprintf("%.0f", f)
 }
 
-func (n normalDamage) damagePercent() (string, error) {
+func (n baseDamage) damagePercent() (string, error) {
 	var fm []string
 
 	f := 0.0
@@ -155,32 +155,28 @@ func (w weaponData) getURL() string {
 	return weaponURL
 }
 
-func (w weapon) getDamage() string {
-	d := w.NormalAttack.Damage.totalDamage()
+func (a attack) getDamage() string {
+	d := a.Damage.totalDamage()
 
-	v, err := w.NormalAttack.Damage.damagePercent()
+	p, err := a.Damage.damagePercent()
 	if err != nil {
 		return "Unknown %"
 	}
 
-	return fmt.Sprintf("Damage: %s (%s)", d, v)
+	return fmt.Sprintf("[Damage: %s (%s), CritChance: %d%%, CritMultiplier: %.2f, StatusChance: %d%%, FireRate: %.2f]", d, p, int(a.CritChance*100), a.CritMultiplier, int(a.StatusChance*100), a.FireRate)
 }
 
 func (w weaponData) getStatsConcat(name string) string {
 	if _, ok := w.Weapons[name]; ok {
 		wWeapon := w.Weapons[name]
 
-		return fmt.Sprintf("%s: [Mastery: %d, Class: %s, NormalAttack: [%s, CritChance: %d%%, CritMultiplier: %.2f, StatusChance: %d%%, FireRate: %.2f], HeavyAttack: %s, SecondaryAttack: %v]",
+		return fmt.Sprintf("%s: [Mastery: %d, Class: %s, NormalAttack: %s, HeavyAttack: %s, SecondaryAttack: %s",
 			name,
 			wWeapon.Mastery,
 			wWeapon.Class,
-			wWeapon.getDamage(),
-			int(wWeapon.NormalAttack.CritChance*100),
-			wWeapon.NormalAttack.CritMultiplier,
-			int(wWeapon.NormalAttack.StatusChance*100),
-			wWeapon.NormalAttack.FireRate,
+			wWeapon.NormalAttack.getDamage(),
 			wWeapon.HeavyAttack,
-			wWeapon.SecondaryAttack,
+			wWeapon.SecondaryAttack.getDamage(),
 		)
 	}
 

@@ -63,7 +63,7 @@ func TestNormalDamageUnmarshalJSON(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(*testing.T) {
-			var j = new(normalDamage)
+			var j = new(baseDamage)
 			value, err := json.Marshal(tt.expected)
 			if err != nil {
 				t.Error(err)
@@ -80,6 +80,7 @@ func TestNormalDamageUnmarshalJSON(t *testing.T) {
 		})
 	}
 }
+
 func TestTotalDamage(t *testing.T) {
 	var tests = []struct {
 		name     string
@@ -92,7 +93,7 @@ func TestTotalDamage(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(*testing.T) {
-			var j = new(normalDamage)
+			var j = new(baseDamage)
 			value, err := json.Marshal(tt.value)
 			if err != nil {
 				t.Error(err)
@@ -109,6 +110,7 @@ func TestTotalDamage(t *testing.T) {
 		})
 	}
 }
+
 func TestNormalDamage_damagePercent(t *testing.T) {
 	var tests = []struct {
 		name     string
@@ -125,7 +127,7 @@ func TestNormalDamage_damagePercent(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(*testing.T) {
-			var j = new(normalDamage)
+			var j = new(baseDamage)
 			value, err := json.Marshal(tt.value)
 			if err != nil {
 				t.Error(err)
